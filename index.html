@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101318">
+    <title>人物去背與手部骨架</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <main class="app-shell">
+        <header class="page-header">
+            <div>
+                <p class="eyebrow">MEDIAPIPE · POSE + HAND LANDMARKER</p>
+                <h1>人物去背與手部骨架</h1>
+                    <p class="intro">即時移除背景並描繪手部骨架。</p>
+            </div>
+            <div class="status-pill" aria-live="polite">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">相機尚未啟動</span>
+            </div>
+        </header>
+
+        <section class="workspace" aria-label="人物與手部偵測工作區">
+            <div class="camera-card">
+                <div class="camera-toolbar">
+                    <span class="camera-label"><span class="live-indicator"></span>即時預覽</span>
+                    <span class="mirror-badge" id="mirrorBadge">鏡像模式</span>
+                </div>
+                <div class="camera-stage" id="cameraStage">
+                    <video id="webcam" autoplay playsinline muted aria-label="Webcam 即時影像"></video>
+                    <canvas id="personCanvas" aria-label="人物去背畫面"></canvas>
+                    <canvas id="landmarkCanvas" aria-hidden="true"></canvas>
+                    <div class="empty-state" id="emptyState">
+                        <div class="camera-icon" aria-hidden="true">◎</div>
+                        <strong>準備好開始了嗎？</strong>
+                        <span>開啟相機後，允許瀏覽器使用 webcam</span>
+                    </div>
+                    <div class="loading-state" id="loadingState" hidden>
+                        <span class="spinner"></span><span>正在載入人物與手部模型…</span>
+                    </div>
+                </div>
+                <div class="camera-footer">
+                    <span id="detectionText">尚未偵測人物</span>
+                    <span>人物去背 · 手部骨架</span>
+                </div>
+            </div>
+
+            <aside class="control-card">
+                <div class="control-heading">
+                    <p class="eyebrow">控制面板</p>
+                    <h2>相機與方向</h2>
+                </div>
+                <button class="primary-button" id="cameraButton" type="button">
+                    <span class="button-icon" aria-hidden="true">◉</span>
+                    <span id="cameraButtonText">開啟相機</span>
+                </button>
+                <div class="setting-row">
+                    <div class="setting-copy">
+                        <strong>鏡像預覽</strong>
+                        <span id="mirrorDescription">左右翻轉畫面，像照鏡子一樣</span>
+                    </div>
+                    <label class="switch" aria-label="切換鏡像預覽">
+                        <input id="mirrorToggle" type="checkbox" checked>
+                        <span class="switch-track"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-copy">
+                        <strong>人物去背</strong>
+                        <span id="backgroundDescription">移除相機畫面中的背景，只保留人物</span>
+                    </div>
+                    <label class="switch" aria-label="切換人物去背">
+                        <input id="backgroundToggle" type="checkbox" checked>
+                        <span class="switch-track"></span>
+                    </label>
+                </div>
+                <div class="orientation-tip">
+                    <span class="tip-icon" aria-hidden="true">↔</span>
+                    <p><strong>確認左右方向</strong><br>舉起右手測試：鏡像模式下，預覽中的手會像照鏡子一樣出現在畫面左側。關閉鏡像即可查看攝影機原始方向。</p>
+                </div>
+                <div class="legend">
+                    <p class="eyebrow">圖例</p>
+                    <div><span class="legend-dot wrist"></span>手腕</div>
+                    <div><span class="legend-dot joint"></span>關節與指尖</div>
+                    <div><span class="legend-line"></span>骨架連線</div>
+                </div>
+                <p class="privacy-note">影像只在此裝置上即時處理，不會上傳。</p>
+            </aside>
+        </section>
+        <p class="page-note" id="noticeText">提示：請使用 localhost 或 HTTPS 開啟頁面，瀏覽器才允許存取相機。</p>
+    </main>
+    <script type="module" src="./js/script.js"></script>
+</body>
+</html>
