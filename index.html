@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#101318">
-    <title>人物去背與手部骨架</title>
+    <title>人物去背與掌心亂碼畫筆</title>
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
@@ -12,8 +12,8 @@
         <header class="page-header">
             <div>
                 <p class="eyebrow">MEDIAPIPE · POSE + HAND LANDMARKER</p>
-                <h1>人物去背與手部骨架</h1>
-                    <p class="intro">即時移除背景並描繪手部骨架。</p>
+                <h1>人物去背與掌心亂碼畫筆</h1>
+                    <p class="intro">揮動掌心即可用亂碼作畫，字元會在 3 秒內漸漸消散。</p>
             </div>
             <div class="status-pill" aria-live="polite">
                 <span class="status-dot" id="statusDot"></span>
@@ -30,7 +30,7 @@
                 <div class="camera-stage" id="cameraStage">
                     <video id="webcam" autoplay playsinline muted aria-label="Webcam 即時影像"></video>
                     <canvas id="personCanvas" aria-label="人物去背畫面"></canvas>
-                    <canvas id="landmarkCanvas" aria-hidden="true"></canvas>
+                    <canvas id="particleCanvas" aria-hidden="true"></canvas>
                     <div class="empty-state" id="emptyState">
                         <div class="camera-icon" aria-hidden="true">◎</div>
                         <strong>準備好開始了嗎？</strong>
@@ -42,7 +42,7 @@
                 </div>
                 <div class="camera-footer">
                     <span id="detectionText">尚未偵測人物</span>
-                    <span>人物去背 · 手部骨架</span>
+                    <span>掌心亂碼畫筆 · OK 手勢重新開始</span>
                 </div>
             </div>
 
@@ -54,6 +54,10 @@
                 <button class="primary-button" id="cameraButton" type="button">
                     <span class="button-icon" aria-hidden="true">◉</span>
                     <span id="cameraButtonText">開啟相機</span>
+                </button>
+                <button class="secondary-button" id="fullscreenButton" type="button" aria-pressed="false">
+                    <span class="button-icon" aria-hidden="true">⛶</span>
+                    <span id="fullscreenButtonText">畫面全螢幕</span>
                 </button>
                 <div class="setting-row">
                     <div class="setting-copy">
@@ -77,13 +81,7 @@
                 </div>
                 <div class="orientation-tip">
                     <span class="tip-icon" aria-hidden="true">↔</span>
-                    <p><strong>確認左右方向</strong><br>舉起右手測試：鏡像模式下，預覽中的手會像照鏡子一樣出現在畫面左側。關閉鏡像即可查看攝影機原始方向。</p>
-                </div>
-                <div class="legend">
-                    <p class="eyebrow">圖例</p>
-                    <div><span class="legend-dot wrist"></span>手腕</div>
-                    <div><span class="legend-dot joint"></span>關節與指尖</div>
-                    <div><span class="legend-line"></span>骨架連線</div>
+                    <p><strong>確認左右方向</strong><br>舉起右手測試：鏡像模式下，預覽中的手會像照鏡子一樣出現在畫面左側。關閉鏡像即可查看攝影機原始方向。<br><strong>重新開始</strong>：比出 OK 手勢並維持 1.5 秒，清除筆跡並恢復人物。</p>
                 </div>
                 <p class="privacy-note">影像只在此裝置上即時處理，不會上傳。</p>
             </aside>
