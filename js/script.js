@@ -15,10 +15,6 @@ const cameraButton = document.querySelector('#cameraButton');
 const cameraButtonText = document.querySelector('#cameraButtonText');
 const fullscreenButton = document.querySelector('#fullscreenButton');
 const fullscreenButtonText = document.querySelector('#fullscreenButtonText');
-const mirrorToggle = document.querySelector('#mirrorToggle');
-const backgroundToggle = document.querySelector('#backgroundToggle');
-const mirrorBadge = document.querySelector('#mirrorBadge');
-const mirrorDescription = document.querySelector('#mirrorDescription');
 const statusPill = document.querySelector('.status-pill');
 const statusText = document.querySelector('#statusText');
 const statusDot = document.querySelector('#statusDot');
@@ -40,28 +36,14 @@ let particleFrame = 0;
 const particleGlyphs = '亂碼錯誤資料異常混沌失序破碎虛構殘影無序重組錯位字符空白雜訊';
 const gestureMarks = [];
 const previousPalmPositions = new Map();
-const gestureMarkLifetime = 2000;
+const gestureMarkLifetime = 1000;
+const mirrorPreviewEnabled = true;
 let okGestureStartedAt = null;
 let okGestureTriggered = false;
 
 function setStatus(message, state = '') {
     statusText.textContent = message;
     statusPill.dataset.state = state;
-}
-
-function updateMirrorMode() {
-    const isMirrored = mirrorToggle.checked;
-    stage.dataset.mirror = String(isMirrored);
-    mirrorBadge.textContent = isMirrored ? '鏡像模式' : '原始方向';
-    mirrorBadge.classList.toggle('camera-badge-off', !isMirrored);
-    mirrorDescription.textContent = isMirrored
-        ? '左右翻轉畫面，像照鏡子一樣'
-        : '顯示攝影機拍到的原始左右方向';
-}
-
-function updateBackgroundRemoval() {
-    const isRemovingBackground = backgroundToggle.checked;
-    stage.dataset.backgroundRemoval = String(isRemovingBackground);
 }
 
 function updateFullscreenButton() {
@@ -305,13 +287,14 @@ function updateGestureBrush(hands, width, height, now) {
                     const progress = step / count;
                     const centerX = (previous.x + (palm.x - previous.x) * progress) * width;
                     const centerY = (previous.y + (palm.y - previous.y) * progress) * height;
-                    const brushRadius = Math.max(28, palmSize * 0.78);
-                    const glyphCount = Math.max(2, Math.min(4, Math.ceil(palmSize / 25)));
+                    const brushRadius = Math.max(34, palmSize * 1.15);
+                    const glyphCount = Math.max(1, Math.min(2, Math.ceil(palmSize / 40)));
 
                     // 每個筆跡點以掌心寬度為範圍，鋪滿一團隨機字元。
                     for (let glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
                         const angle = Math.random() * Math.PI * 2;
-                        const radius = Math.sqrt(Math.random()) * brushRadius;
+                        // 半徑採中心偏重的分布，越靠外圍的字元越少且距離更鬆散。
+                        const radius = Math.pow(Math.random(), 1.8) * brushRadius;
                         const mark = {
                             x: centerX + Math.cos(angle) * radius,
                             y: centerY + Math.sin(angle) * radius,
@@ -322,16 +305,21 @@ function updateGestureBrush(hands, width, height, now) {
                             color: ['#c2ff7b', '#55e7da', '#eef8df'][Math.floor(Math.random() * 3)]
                         };
                         gestureMarks.push(mark);
-                        eraseContext.save();
-                        eraseContext.fillStyle = '#000';
-                        eraseContext.filter = 'blur(3px)';
-                        eraseContext.font = `700 ${mark.size}px monospace`;
-                        eraseContext.textAlign = 'center';
-                        eraseContext.textBaseline = 'middle';
-                        eraseContext.translate(mark.x, mark.y);
-                        eraseContext.rotate(mark.rotation);
-                        eraseContext.fillText(mark.glyph, 0, 0);
-                        eraseContext.restore();
+                        // 擦除遮罩以多個鄰近字形加密，視覺字元仍維持稀疏。
+                        for (let eraseIndex = 0; eraseIndex < 3; eraseIndex += 1) {
+                            const scatterX = eraseIndex === 0 ? 0 : (Math.random() - 0.5) * mark.size * 1.4;
+                            const scatterY = eraseIndex === 0 ? 0 : (Math.random() - 0.5) * mark.size * 1.4;
+                            eraseContext.save();
+                            eraseContext.fillStyle = '#000';
+                            eraseContext.filter = 'blur(3px)';
+                            eraseContext.font = `700 ${mark.size}px monospace`;
+                            eraseContext.textAlign = 'center';
+                            eraseContext.textBaseline = 'middle';
+                            eraseContext.translate(mark.x + scatterX, mark.y + scatterY);
+                            eraseContext.rotate(mark.rotation);
+                            eraseContext.fillText(mark.glyph, 0, 0);
+                            eraseContext.restore();
+                        }
                     }
                 }
             }
@@ -361,7 +349,7 @@ function drawGestureMarks(width, height, now) {
         particleContext.textBaseline = 'middle';
         particleContext.translate(mark.x, mark.y);
         particleContext.rotate(mark.rotation);
-        if (mirrorToggle.checked) particleContext.scale(-1, 1);
+        if (mirrorPreviewEnabled) particleContext.scale(-1, 1);
         particleContext.fillText(mark.glyph, 0, 0);
         particleContext.restore();
     }
@@ -472,7 +460,7 @@ function drawLetterParticles(maskData, maskWidth, maskHeight, width, height) {
             particleContext.globalAlpha = 0.42 + (seed % 45) / 100;
             particleContext.fillStyle = seed % 3 === 0 ? '#c2ff7b' : seed % 3 === 1 ? '#55e7da' : '#eef8df';
             particleContext.font = `600 ${size}px monospace`;
-            if (mirrorToggle.checked) {
+            if (mirrorPreviewEnabled) {
                 particleContext.save();
                 particleContext.translate(px, py);
                 particleContext.scale(-1, 1);
@@ -508,12 +496,7 @@ function detectFrame() {
                 drawHandOverlay(handResult, poseResult);
                 updateRestartGesture(handResult.landmarks ?? [], video.videoWidth, video.videoHeight, timestamp);
                 if (mask) {
-                    if (backgroundToggle.checked) {
-                        drawPersonCutout(mask);
-                    } else {
-                        personContext.clearRect(0, 0, personCanvas.width, personCanvas.height);
-                        particleContext.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
-                    }
+                    drawPersonCutout(mask);
                 } else {
                     previousMaskData = null;
                     personContext.clearRect(0, 0, personCanvas.width, personCanvas.height);
@@ -545,13 +528,3 @@ cameraButton.addEventListener('click', () => {
 fullscreenButton.addEventListener('click', toggleFullscreen);
 document.addEventListener('fullscreenchange', updateFullscreenButton);
 
-mirrorToggle.addEventListener('change', updateMirrorMode);
-backgroundToggle.addEventListener('change', () => {
-    updateBackgroundRemoval();
-    if (!backgroundToggle.checked) {
-        personContext.clearRect(0, 0, personCanvas.width, personCanvas.height);
-        particleContext.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
-    }
-});
-updateMirrorMode();
-updateBackgroundRemoval();

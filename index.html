@@ -10,11 +10,6 @@
 <body>
     <main class="app-shell">
         <header class="page-header">
-            <div>
-                <p class="eyebrow">MEDIAPIPE · POSE + HAND LANDMARKER</p>
-                <h1>人物去背與掌心亂碼畫筆</h1>
-                    <p class="intro">揮動掌心即可用亂碼作畫，字元會在 3 秒內漸漸消散。</p>
-            </div>
             <div class="status-pill" aria-live="polite">
                 <span class="status-dot" id="statusDot"></span>
                 <span id="statusText">相機尚未啟動</span>
@@ -25,9 +20,8 @@
             <div class="camera-card">
                 <div class="camera-toolbar">
                     <span class="camera-label"><span class="live-indicator"></span>即時預覽</span>
-                    <span class="mirror-badge" id="mirrorBadge">鏡像模式</span>
                 </div>
-                <div class="camera-stage" id="cameraStage">
+                <div class="camera-stage" id="cameraStage" data-mirror="true" data-background-removal="true">
                     <video id="webcam" autoplay playsinline muted aria-label="Webcam 即時影像"></video>
                     <canvas id="personCanvas" aria-label="人物去背畫面"></canvas>
                     <canvas id="particleCanvas" aria-hidden="true"></canvas>
@@ -42,14 +36,14 @@
                 </div>
                 <div class="camera-footer">
                     <span id="detectionText">尚未偵測人物</span>
-                    <span>掌心亂碼畫筆 · OK 手勢重新開始</span>
+                    <span>OK 手勢重新開始</span>
                 </div>
             </div>
 
             <aside class="control-card">
                 <div class="control-heading">
                     <p class="eyebrow">控制面板</p>
-                    <h2>相機與方向</h2>
+                    <h2>相機控制</h2>
                 </div>
                 <button class="primary-button" id="cameraButton" type="button">
                     <span class="button-icon" aria-hidden="true">◉</span>
@@ -59,29 +53,9 @@
                     <span class="button-icon" aria-hidden="true">⛶</span>
                     <span id="fullscreenButtonText">畫面全螢幕</span>
                 </button>
-                <div class="setting-row">
-                    <div class="setting-copy">
-                        <strong>鏡像預覽</strong>
-                        <span id="mirrorDescription">左右翻轉畫面，像照鏡子一樣</span>
-                    </div>
-                    <label class="switch" aria-label="切換鏡像預覽">
-                        <input id="mirrorToggle" type="checkbox" checked>
-                        <span class="switch-track"></span>
-                    </label>
-                </div>
-                <div class="setting-row">
-                    <div class="setting-copy">
-                        <strong>人物去背</strong>
-                        <span id="backgroundDescription">移除相機畫面中的背景，只保留人物</span>
-                    </div>
-                    <label class="switch" aria-label="切換人物去背">
-                        <input id="backgroundToggle" type="checkbox" checked>
-                        <span class="switch-track"></span>
-                    </label>
-                </div>
-                <div class="orientation-tip">
-                    <span class="tip-icon" aria-hidden="true">↔</span>
-                    <p><strong>確認左右方向</strong><br>舉起右手測試：鏡像模式下，預覽中的手會像照鏡子一樣出現在畫面左側。關閉鏡像即可查看攝影機原始方向。<br><strong>重新開始</strong>：比出 OK 手勢並維持 1.5 秒，清除筆跡並恢復人物。</p>
+                <div class="gesture-tip">
+                    <span class="tip-icon" aria-hidden="true">↻</span>
+                    <p><strong>重新開始</strong><br>比出 OK 手勢並維持 1.5 秒，清除筆跡並恢復人物。</p>
                 </div>
                 <p class="privacy-note">影像只在此裝置上即時處理，不會上傳。</p>
             </aside>
